@@ -1,1 +1,5 @@
 neat-checkpoint*
+*.gv
+evolution_stats
+*.svg
+tensortrade/__pycache__/*
