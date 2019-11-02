@@ -26,6 +26,7 @@ class NeatRewardStrategy(RewardStrategy, metaclass=ABCMeta):
     def __init__(self):
         self._purchase_price = -1
         self._is_holding_instrument = False
+        self.phi = (1 + 5 ** 0.5) / 2
         pass
 
     def reset(self):
@@ -43,8 +44,10 @@ class NeatRewardStrategy(RewardStrategy, metaclass=ABCMeta):
         if trade.is_hold and self._is_holding_instrument:
             profit_per_instrument = exchange.current_price - self._purchase_price
             profit = trade.amount * profit_per_instrument
+            print('holding', profit, exchange.trades)
             profit_sign = np.sign(profit)
             reward = profit_sign * (1 + (np.log(abs(profit))))
+
         elif trade.is_hold and not self._is_holding_instrument and current_step > 5:
             # I am NOT holding an instrument and I am holding...
             # I will be rewarded if holding was the right decision.
@@ -58,23 +61,25 @@ class NeatRewardStrategy(RewardStrategy, metaclass=ABCMeta):
             if pos_or_neg > 0:
                 # if the price has rizen in the previous 5 time steps we have missed an oportunity and should be penalized.
                 # we will penalize by a log of the profit we would have made had we bought and sold at this timestep
-                r = -1*(1+(2** np.log10(abs(d[0] - d[-1]))))
+                r = -1*((self.phi ** np.log10(abs(d[0] - d[-1]))))
             elif pos_or_neg < 0:
                 # if the price has dropped in the previous 5 time steps then we have correctly held and should be rewarded
                 # we will reward by a log of the inverse of the loss, because we have saved money.
-                r = abs(1+(2** np.log10(abs(d[-1] - d[0]))))
+                r = abs((self.phi ** np.log10(abs(d[-1] - d[0]))))
             reward= r
 
         elif trade.is_buy and trade.amount > 0 and trade.price < self.exchange.balance:
             self._purchase_price = trade.price
             self._is_holding_instrument = True
-            reward= 100
+            reward= 1
 
         elif trade.is_sell and trade.amount > 0:
             self._is_holding_instrument = False
             profit_per_instrument = trade.price - self._purchase_price
             profit = trade.amount * profit_per_instrument
             profit_sign = np.sign(profit)
-            reward = profit_sign * (1 + (5 ** np.log10(abs(profit))))
+            reward = profit_sign * (1 + ((2**self.phi) ** np.log10(abs(profit))))
 
+        if reward is 0:
+            print(current_step, reward, self.exchange.balance, self.exchange.net_worth, trade._amount, trade._price, trade._trade_type)
         return reward

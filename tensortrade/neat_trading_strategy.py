@@ -240,19 +240,23 @@ class NeatTradingStrategy(TradingStrategy):
             self.environment.exchange._current_step = self._data_frame_start_tick
             self.environment._current_step = self._data_frame_start_tick
 
-            self.eval_genome(genome)
+            genome.fitness = self.eval_genome(genome, config)
 
         clear_output()
 
-    def _threaded_eval(self, genome, config)
+    def _threaded_eval(self, genome, config):
+        self._prep_eval()
+        genome.fitness = self.eval_genome(genome, config)
         return
 
-    def eval_genome(self, genome):
+    def eval_genome(self, genome, config: neat.Config = None):
         if self._watch_genome_evaluation:
             print('---------------------------')
 
+        if config is None:
+            config = self._config.copy()
         # Initialize the network for this genome
-        net = neat.nn.RecurrentNetwork.create(genome, self._config)
+        net = neat.nn.RecurrentNetwork.create(genome, config)
         # calculate the steps and keep track of some intial variables
         steps_completed = 0
         done = False
@@ -260,7 +264,7 @@ class NeatTradingStrategy(TradingStrategy):
         self._genome_performance[genome.key] = deepcopy(self._performance_stub)
 
         # set inital reward
-        genome.fitness = 0.0
+        fitness = 0.0
 
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
@@ -272,20 +276,20 @@ class NeatTradingStrategy(TradingStrategy):
             action =  self._derive_action(output)
             if action is -1:
                 print('BROKEN ACTION', output)
-                genome.fitness = -100000
+                fitness = -100000
                 break
 
             # feed action into environment to get reward for selected action
             obs, rewards, done, info = self.environment.step(action)
 
             # feed rewards to NEAT to calculate fitness.
-            genome.fitness += rewards
+            fitness += rewards
 
             # count this as a completed step
             steps_completed += 1
 
             # stop iterating if we haven't learned to trade or we pass a fitness threshold
-            if genome.fitness < self._learn_to_trade_theshold:
+            if fitness < self._learn_to_trade_theshold:
                 if self._watch_genome_evaluation:
                     print("Learn to trade asshole!")
                 done= True
@@ -306,12 +310,13 @@ class NeatTradingStrategy(TradingStrategy):
         # ballance our reward by how much profit we've made in our trading session.
 
         self._report_genome_evaluation(genome)
-        return
+        return fitness
 
     def run(self, generations: int = None, testing: bool = True, episode_callback: Callable[[pd.DataFrame], bool] = None) -> pd.DataFrame:
         # Run for up to 300 generations.
 
-        # pe = neat.ParallelEvaluator(10, self._eval)
+        # pe = neat.ParallelEvaluator(10, self._threaded_eval)
+        # winner = self._pop.run(pe.evaluate, generations)
         winner = self._pop.run(self._eval_population, generations)
 
         # Display the winning genome.
