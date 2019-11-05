@@ -19,23 +19,26 @@ import pandas as pd
 import numpy as np
 
 from statistics import mode, stdev, StatisticsError
-
-from abc import ABCMeta, abstractmethod
 from typing import Union, Callable, List, Dict
+from IPython.display import clear_output
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict
+from collections import Counter
+import matplotlib.pyplot as plt
+from copy import deepcopy
+
+import math
+import random
 
 import neat
-from collections import Counter
 
 from tensortrade.environments.trading_environment import TradingEnvironment
 from tensortrade.features.feature_pipeline import FeaturePipeline
 from tensortrade.strategies import TradingStrategy
-from termcolor import colored as c
-from IPython.display import clear_output
-import math
-import random
-from copy import deepcopy
+from tensortrade.trades import TradeType
 
-import matplotlib.pyplot as plt
+
+
 
 class NeatTradingStrategy(TradingStrategy):
     """A trading strategy capable of self tuning, training, and evaluating using the NEAT Neuralevolution."""
@@ -202,9 +205,14 @@ class NeatTradingStrategy(TradingStrategy):
             print('Balance:', p['balance'])
             print("Net Worth:", p['net_worth'])
             print('Steps Completed', p['steps_completed'])
-            print('Most common action', Counter(p['actions']))
 
-            print('Number of trades:', Counter(self._environment.exchange.trades['type']))
+            actions = defaultdict(int)
+            for action, count in Counter(p['actions']).items():
+                    actions[self.environment.action_strategy._get_trade_type(action).name] = count
+
+            print('Most common action', actions.items())
+
+            print('Number of trades:', Counter(self.environment.exchange.trades['type']))
 
         return
 
