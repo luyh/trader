@@ -56,20 +56,26 @@ class NeatTradingStrategy(TradingStrategy):
 
         # population controls
         self._pop_size = kwargs.get('pop_size', 20)
-        self._max_stagnation = kwargs.get('max_stagnation', 2)
+        self._max_stagnation = kwargs.get('max_stagnation', 15)
         self._species_elitism = kwargs.get('species_elitism', 3)
         self._elitism = kwargs.get('elitism', 2)
+        self._survival_threshold = kwargs.get('survival_threshold', 0.2)
+        self._min_species_size = kwargs.get('min_species_size', 2)
+
+        # species controls
+        self._compatibility_threshold = kwargs.get('compatibility_threshold', 5)
 
         # network controls
         self._feed_foward = kwargs.get('feed_forward', False)
         self._initial_connection = kwargs.get('initial_connection', 'full_direct')
 
         # connection controls
-        self._enabled_default = kwargs.get('enabled_default', False)
-        self._enabled_mutate_rate = kwargs.get('enabled_mutate_rate', 0.01)
+        self._enabled_default = kwargs.get('enabled_default', True)
+        self._enabled_mutate_rate = kwargs.get('enabled_mutate_rate', 0.1)
         self._conn_add_prob = kwargs.get('conn_add_prob', 0.5)
         self._conn_delete_prob = kwargs.get('conn_delete_prob', 0.1)
-
+        self._node_add_prob = kwargs.get('node_add_prob', 0.5)
+        self._node_delete_prob = kwargs.get('node_delete_prob', 0.1)
 
 
         self._neat_config_filename = neat_config
@@ -105,6 +111,7 @@ class NeatTradingStrategy(TradingStrategy):
         # when pop.generation % this == 0 then the full data frame will be evaluated for every genome.
         # set to False to disable.
         self._full_evaluation_interval = kwargs.get('full_evaluation_interval', 20)
+        self._disable_full_evaluation = kwargs.get('disable_full_evaluation', False)
         # Force full evaluation
         self._full_evaluation = kwargs.get('full_evaluation', False)
 
@@ -112,11 +119,34 @@ class NeatTradingStrategy(TradingStrategy):
 
     def load_config(self):
         config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-        neat.DefaultSpeciesSet, neat.DefaultStagnation,
-        self._neat_config_filename)
+                            neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                            self._neat_config_filename)
+
+        print(config)
         config.genome_config.num_inputs = len(self._environment.exchange.data_frame.columns)
         config.genome_config.num_hidden = len(self._environment.exchange.data_frame.columns)
         config.genome_config.input_keys = [-i - 1 for i in range(config.genome_config.num_inputs)]
+        config.genome_config.feed_forward = self._feed_foward
+        config.pop_size = self._pop_size
+
+        # config.species_set_config.species_fitness_func = self._species_fitness_func #TODO
+        config.stagnation_config.max_stagnation = self._max_stagnation
+        config.stagnation_config.species_elitism = self._species_elitism
+
+        config.reproduction_config.elitism = self._elitism
+        config.reproduction_config.survival_threshold = self._survival_threshold
+        config.reproduction_config.min_species_size = self._min_species_size
+
+        config.species_set_config.compatibility_threshold = self._compatibility_threshold
+
+        config.genome_config.enabled_default = self._enabled_default
+        config.genome_config.initial_connection = self._initial_connection
+        config.genome_config.enabled_mutate_rate = self._enabled_mutate_rate
+        config.genome_config.conn_add_prob = self._conn_add_prob
+        config.genome_config.conn_delete_prob = self._conn_delete_prob
+        config.genome_config.node_add_prob = self._node_add_prob
+        config.genome_config.node_delete_prob = self._node_delete_prob
+
         return config
 
     @property
@@ -128,7 +158,7 @@ class NeatTradingStrategy(TradingStrategy):
 
     def _get_data_frame_window(self, start=None, advance=None, end=None):
         # find a random window to evaluate all genomes on
-        if (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
+        if self._disable_full_evaluation is False and (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
             self.data_frame_start_tick = 0
             self._data_frame_window = self._data_frame_length-1
         else:
@@ -186,6 +216,7 @@ class NeatTradingStrategy(TradingStrategy):
         raise NotImplementedError
 
     def _derive_action(self, output):
+        print(output[0])
         try:
             action = int(self._actions/2 * (1 + math.tanh(output[0])))
         except:
@@ -227,7 +258,7 @@ class NeatTradingStrategy(TradingStrategy):
 
     def _prep_eval(self):
         # find a random window to evaluate all genomes on
-        if (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
+        if self._disable_full_evaluation is False and (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
             self.data_frame_start_tick = 0
             self._data_frame_window = self._data_frame_length-1
         else:
