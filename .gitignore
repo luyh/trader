@@ -3,3 +3,4 @@ neat-checkpoint*
 evolution_stats
 *.svg
 tensortrade/__pycache__/*
+.ipynb_checkpoints/*
