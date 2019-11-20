@@ -19,23 +19,26 @@ import pandas as pd
 import numpy as np
 
 from statistics import mode, stdev, StatisticsError
-
-from abc import ABCMeta, abstractmethod
 from typing import Union, Callable, List, Dict
+from IPython.display import clear_output
+from abc import ABCMeta, abstractmethod
+from collections import defaultdict
+from collections import Counter
+import matplotlib.pyplot as plt
+from copy import deepcopy
+
+import math
+import random
 
 import neat
-from collections import Counter
 
 from tensortrade.environments.trading_environment import TradingEnvironment
 from tensortrade.features.feature_pipeline import FeaturePipeline
 from tensortrade.strategies import TradingStrategy
-from termcolor import colored as c
-from IPython.display import clear_output
-import math
-import random
-from copy import deepcopy
+from tensortrade.trades import TradeType
 
-import matplotlib.pyplot as plt
+
+
 
 class NeatTradingStrategy(TradingStrategy):
     """A trading strategy capable of self tuning, training, and evaluating using the NEAT Neuralevolution."""
@@ -49,12 +52,12 @@ class NeatTradingStrategy(TradingStrategy):
             kwargs (optional): Optional keyword arguments to adjust the strategy.
         """
         self._environment = environment
-        self._actions = self._environment.action_strategy.n_actions
+        self._actions = self._environment.action_scheme.n_actions
 
         # population controls
         self._pop_size = kwargs.get('pop_size', 20)
         self._max_stagnation = kwargs.get('max_stagnation', 2)
-        self._species_elitism = kwargs.get('species_elitism', 1)
+        self._species_elitism = kwargs.get('species_elitism', 3)
         self._elitism = kwargs.get('elitism', 2)
 
         # network controls
@@ -202,9 +205,14 @@ class NeatTradingStrategy(TradingStrategy):
             print('Balance:', p['balance'])
             print("Net Worth:", p['net_worth'])
             print('Steps Completed', p['steps_completed'])
-            print('Most common action', Counter(p['actions']))
 
-            print('Number of trades:', Counter(self._environment.exchange.trades['type']))
+            actions = defaultdict(int)
+            for action, count in Counter(p['actions']).items():
+                actions[self.environment.action_scheme._get_trade_type(action).name] = count
+
+            print('Most common action', actions.items())
+
+            print('Number of trades:', Counter(self.environment.exchange.trades['type']))
 
         return
 
@@ -240,19 +248,23 @@ class NeatTradingStrategy(TradingStrategy):
             self.environment.exchange._current_step = self._data_frame_start_tick
             self.environment._current_step = self._data_frame_start_tick
 
-            self.eval_genome(genome)
+            genome.fitness = self.eval_genome(genome, config)
 
         clear_output()
 
-    def _threaded_eval(self, genome, config)
-        return
+    def _threaded_eval(self, genome, config):
+        self._prep_eval()
+        genome.fitness = self.eval_genome(genome, config)
+        return genome.fitness
 
-    def eval_genome(self, genome):
+    def eval_genome(self, genome, config: neat.Config = None):
         if self._watch_genome_evaluation:
             print('---------------------------')
 
+        if config is None:
+            config = self._config.copy()
         # Initialize the network for this genome
-        net = neat.nn.RecurrentNetwork.create(genome, self._config)
+        net = neat.nn.RecurrentNetwork.create(genome, config)
         # calculate the steps and keep track of some intial variables
         steps_completed = 0
         done = False
@@ -260,7 +272,7 @@ class NeatTradingStrategy(TradingStrategy):
         self._genome_performance[genome.key] = deepcopy(self._performance_stub)
 
         # set inital reward
-        genome.fitness = 0.0
+        fitness = 0.0
 
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
@@ -272,20 +284,20 @@ class NeatTradingStrategy(TradingStrategy):
             action =  self._derive_action(output)
             if action is -1:
                 print('BROKEN ACTION', output)
-                genome.fitness = -100000
+                fitness = -100000
                 break
 
             # feed action into environment to get reward for selected action
             obs, rewards, done, info = self.environment.step(action)
 
             # feed rewards to NEAT to calculate fitness.
-            genome.fitness += rewards
+            fitness += rewards
 
             # count this as a completed step
             steps_completed += 1
 
             # stop iterating if we haven't learned to trade or we pass a fitness threshold
-            if genome.fitness < self._learn_to_trade_theshold:
+            if fitness < self._learn_to_trade_theshold:
                 if self._watch_genome_evaluation:
                     print("Learn to trade asshole!")
                 done= True
@@ -294,9 +306,9 @@ class NeatTradingStrategy(TradingStrategy):
             self._genome_performance[genome.key]['rewards'] += rewards
             self._genome_performance[genome.key]['actions'].append(action)
             self._genome_performance[genome.key]['steps_completed'] = steps_completed
-            self._genome_performance[genome.key]['trades'] = len(self._environment.exchange.trades)
-            self._genome_performance[genome.key]['balance'] = self._environment.exchange.balance
-            self._genome_performance[genome.key]['net_worth'] = self._environment.exchange.net_worth
+            self._genome_performance[genome.key]['trades'] = len(self.environment.exchange.trades)
+            self._genome_performance[genome.key]['balance'] = self.environment.exchange.balance
+            self._genome_performance[genome.key]['net_worth'] = self.environment.exchange.net_worth
 
             if done:
                 if self._watch_genome_evaluation:
@@ -306,13 +318,14 @@ class NeatTradingStrategy(TradingStrategy):
         # ballance our reward by how much profit we've made in our trading session.
 
         self._report_genome_evaluation(genome)
-        return
+        return fitness
 
     def run(self, generations: int = None, testing: bool = True, episode_callback: Callable[[pd.DataFrame], bool] = None) -> pd.DataFrame:
         # Run for up to 300 generations.
 
-        # pe = neat.ParallelEvaluator(10, self._eval)
-        winner = self._pop.run(self._eval_population, generations)
+        pe = neat.ParallelEvaluator(10, self._threaded_eval)
+        winner = self._pop.run(pe.evaluate, generations)
+        # winner = self._pop.run(self._eval_population, generations)
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
