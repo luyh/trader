@@ -49,8 +49,8 @@ class NeatRewardStrategy(RewardScheme, metaclass=ABCMeta):
             if trade.is_hold and self._is_holding_instrument:
                 reward = 1*sign + log(1 + abs_profit)
                 self._is_holding_instrument = True
-
-            elif trade.is_buy:
+            elif trade.is_buy and not self._is_holding_instrument:
+                # did we just sell and buy on an upswing?
                 self._is_holding_instrument = True
                 reward = 1
             elif trade.is_sell and self._is_holding_instrument:
