@@ -18,7 +18,7 @@ import numpy as np
 from math import log
 from abc import ABCMeta, abstractmethod
 
-from neat_stragtegy.trades import Trade
+from tensortrade.trades import Trade
 
 
 class NeatRewardStrategy(RewardScheme, metaclass=ABCMeta):
