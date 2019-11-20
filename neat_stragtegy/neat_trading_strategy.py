@@ -32,10 +32,10 @@ import random
 
 import neat
 
-from tensortrade.environments.trading_environment import TradingEnvironment
-from tensortrade.features.feature_pipeline import FeaturePipeline
-from tensortrade.strategies import TradingStrategy
-from tensortrade.trades import TradeType
+from neat_stragtegy.environments.trading_environment import TradingEnvironment
+from neat_stragtegy.features.feature_pipeline import FeaturePipeline
+from neat_stragtegy.strategies import TradingStrategy
+from neat_stragtegy.trades import TradeType
 
 
 

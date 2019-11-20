@@ -13,7 +13,7 @@ numpy.seterr(divide = 'ignore')
 
 import sys,os
 sys.path.append(os.path.dirname(os.path.abspath('')))
-sys.path.append(os.path.abspath('')+"\\tensortrade")
+sys.path.append(os.path.abspath('')+"\\neat_stragtegy")
 
 import pandas as pd
 data_file ='./data/processed/binance/btc_usdt_1h.csv'
@@ -41,8 +41,8 @@ print('columns', df.columns)
 print(df_test.head())
 
 import tensortrade
-from neat_trading_strategy import NeatTradingStrategy as TradingStrategy
-from neat_reward_strategy import NeatRewardStrategy as ProfitStrategy
+from neat_stragtegy.neat_trading_strategy import NeatTradingStrategy as TradingStrategy
+from neat_stragtegy.neat_reward_strategy import NeatRewardStrategy as ProfitStrategy
 from tensortrade.actions import DiscreteActions
 from tensortrade.exchanges.simulated import SimulatedExchange as Exchange
 from tensortrade.features.scalers import MinMaxNormalizer
