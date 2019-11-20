@@ -250,7 +250,7 @@ class NeatTradingStrategy(TradingStrategy):
 
             genome.fitness = self.eval_genome(genome, config)
 
-        clear_output()
+        #clear_output()
 
     def _threaded_eval(self, genome, config):
         self._prep_eval()
@@ -323,9 +323,9 @@ class NeatTradingStrategy(TradingStrategy):
     def run(self, generations: int = None, testing: bool = True, episode_callback: Callable[[pd.DataFrame], bool] = None) -> pd.DataFrame:
         # Run for up to 300 generations.
 
-        pe = neat.ParallelEvaluator(10, self._threaded_eval)
-        winner = self._pop.run(pe.evaluate, generations)
-        # winner = self._pop.run(self._eval_population, generations)
+        # pe = neat.ParallelEvaluator(10, self._threaded_eval)
+        # winner = self._pop.run(pe.evaluate, generations)
+        winner = self._pop.run(self._eval_population, generations)
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
