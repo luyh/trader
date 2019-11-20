@@ -38,14 +38,14 @@ class NeatRewardStrategy(RewardScheme, metaclass=ABCMeta):
         reward = 0
         current_price = self.exchange.current_price(trade.symbol)
         profit_per_instrument = current_price - self._purchase_price
-        abs_profit = abs(trade.transact_amount * profit_per_instrument)
-        sign = np.sign(trade.transact_amount * profit_per_instrument)
+        abs_profit = abs(trade.amount * profit_per_instrument)
+        sign = np.sign(trade.amount * profit_per_instrument)
 
         # net Worth
         # net_worth_change = 10000 - self.exchange.net_worth
 
 
-        if trade.valid:
+        if True: #trade.valid:
             if trade.is_hold and self._is_holding_instrument:
                 reward = 1*sign + log(1 + abs_profit)
                 self._is_holding_instrument = True
