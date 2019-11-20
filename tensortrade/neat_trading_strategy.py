@@ -111,7 +111,7 @@ class NeatTradingStrategy(TradingStrategy):
         # when pop.generation % this == 0 then the full data frame will be evaluated for every genome.
         # set to False to disable.
         self._full_evaluation_interval = kwargs.get('full_evaluation_interval', 20)
-
+        self._disable_full_evaluation = kwargs.get('disable_full_evaluation', False)
         # Force full evaluation
         self._full_evaluation = kwargs.get('full_evaluation', False)
 
@@ -158,7 +158,7 @@ class NeatTradingStrategy(TradingStrategy):
 
     def _get_data_frame_window(self, start=None, advance=None, end=None):
         # find a random window to evaluate all genomes on
-        if (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
+        if self._disable_full_evaluation is False and (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
             self.data_frame_start_tick = 0
             self._data_frame_window = self._data_frame_length-1
         else:
@@ -216,6 +216,7 @@ class NeatTradingStrategy(TradingStrategy):
         raise NotImplementedError
 
     def _derive_action(self, output):
+        print(output[0])
         try:
             action = int(self._actions/2 * (1 + math.tanh(output[0])))
         except:
@@ -257,7 +258,7 @@ class NeatTradingStrategy(TradingStrategy):
 
     def _prep_eval(self):
         # find a random window to evaluate all genomes on
-        if (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
+        if self._disable_full_evaluation is False and (self._pop.generation + 1) % self._full_evaluation_interval is 0 or self._full_evaluation is True:
             self.data_frame_start_tick = 0
             self._data_frame_window = self._data_frame_length-1
         else:
