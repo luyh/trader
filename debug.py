@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.abspath('')))
 sys.path.append(os.path.abspath('')+"\\neat_stragtegy")
 
 import pandas as pd
-data_file ='./data/processed/binance/btc_usdt_1h.csv'
+data_file ='./data/processed/binance/btc_usdt_5m.csv'
 df = pd.read_csv(data_file, index_col=[0])
 
 
