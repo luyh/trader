@@ -238,7 +238,9 @@ class NeatTradingStrategy(TradingStrategy):
 
     def _eval_population(self, genomes, config):
         self._prep_eval()
+        genomes_nums = len(genomes)
         for genome_id, genome in genomes:
+            #todo:add tensorforce bar            print('genome_id: {},total genomes nums:{}'.format(genome_id,genomes_nums))
             if not self._watch_genome_evaluation:
                 print('*',end='')
 
@@ -250,7 +252,7 @@ class NeatTradingStrategy(TradingStrategy):
 
             genome.fitness = self.eval_genome(genome, config)
 
-        #clear_output()
+        clear_output()
 
     def _threaded_eval(self, genome, config):
         self._prep_eval()
@@ -277,6 +279,7 @@ class NeatTradingStrategy(TradingStrategy):
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
         while(steps_completed < self._data_frame_window):
+            print('steps_completed:{},_data_frame_window:{}'.format(steps_completed,self._data_frame_window))
             # activate() the genome and calculate the action output
             output = net.activate(self._get_current_observation(steps_completed))
 

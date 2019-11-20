@@ -1,30 +1,12 @@
-import tensorflow as tf
-tf.enable_eager_execution()
-tf.executing_eagerly()
-
-import warnings
-import numpy
-def warn(*args, **kwargs):
-    pass
-
-warnings.warn = warn
-warnings.simplefilter(action='ignore', category=FutureWarning)
-numpy.seterr(divide = 'ignore')
-
-import sys,os
-sys.path.append(os.path.dirname(os.path.abspath('')))
-sys.path.append(os.path.abspath('')+"\\neat_stragtegy")
-
 import pandas as pd
 data_file ='./data/processed/binance/btc_usdt_5m.csv'
 df = pd.read_csv(data_file, index_col=[0])
-
 
 # number of days we want to pull from the dataframe
 days_of_data = 365
 
 # number of data frames (our DF is in 1h timesteps)
-frames = days_of_data * 24 * 5
+frames = days_of_data * 24 * 12
 # frames = len(df)
 train_test_percentage = 0.4
 
@@ -43,6 +25,7 @@ print(df_test.head())
 import tensortrade
 from neat_stragtegy.neat_trading_strategy import NeatTradingStrategy as TradingStrategy
 from neat_stragtegy.neat_reward_strategy import NeatRewardStrategy as ProfitStrategy
+
 from tensortrade.actions import DiscreteActions
 from tensortrade.exchanges.simulated import SimulatedExchange as Exchange
 from tensortrade.features.scalers import MinMaxNormalizer
@@ -85,7 +68,7 @@ strategy = TradingStrategy(environment=environment,
                            watch_genome_evaluation=False,
                            only_show_profitable=False,
                            learn_to_trade_theshold=-10000,
-                           data_frame_window = segments_in_day * days
+                           data_frame_window = segments_in_day * days,
                           )
 
 print("Running through ", strategy._data_frame_window, ' steps')
