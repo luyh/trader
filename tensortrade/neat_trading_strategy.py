@@ -105,6 +105,7 @@ class NeatTradingStrategy(TradingStrategy):
         # when pop.generation % this == 0 then the full data frame will be evaluated for every genome.
         # set to False to disable.
         self._full_evaluation_interval = kwargs.get('full_evaluation_interval', 20)
+        
         # Force full evaluation
         self._full_evaluation = kwargs.get('full_evaluation', False)
 
@@ -117,6 +118,16 @@ class NeatTradingStrategy(TradingStrategy):
         config.genome_config.num_inputs = len(self._environment.exchange.data_frame.columns)
         config.genome_config.num_hidden = len(self._environment.exchange.data_frame.columns)
         config.genome_config.input_keys = [-i - 1 for i in range(config.genome_config.num_inputs)]
+        config.genome_config.feed_forward = self._feed_foward
+        config.genome_config.pop_size = self._pop_size
+        config.genome_config.max_stagnation = self._max_stagnation
+        config.genome_config.species_elitism = self._species_elitism
+        config.genome_config.elitism = self._elitism
+        config.genome_config.enabled_default = self._enabled_default
+        config.genome_config.enabled_mutate_rate = self._enabled_mutate_rate
+        config.genome_config.conn_add_prob = self._conn_add_prob
+        config.genome_config.conn_delete_prob = self._conn_delete_prob
+
         return config
 
     @property
