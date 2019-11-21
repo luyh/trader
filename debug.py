@@ -2,8 +2,18 @@ import pandas as pd
 data_file ='./data/processed/binance/btc_usdt_5m.csv'
 df = pd.read_csv(data_file, index_col=[0])
 
-# number of days we want to pull from the dataframe
-days_of_data = 365
+import os,sys
+if sys.platform == 'win32':
+    # number of days we want to pull from the dataframe
+    days_of_data = 7
+    pop_size = 10
+    days = 1
+    generations = 5
+else:
+    days_of_data = 365
+    pop_size = 500
+    days = 7
+    generations = 100
 
 # number of data frames (our DF is in 1h timesteps)
 frames = days_of_data * 24 * 12
@@ -21,6 +31,8 @@ print('test shape', df_test.shape)
 print('columns', df.columns)
 
 print(df_test.head())
+
+del df
 
 import tensortrade
 from neat_stragtegy.neat_trading_strategy import NeatTradingStrategy as TradingStrategy
@@ -43,7 +55,7 @@ print('fin strats')
 exchange = Exchange(data_frame=df_train,
                     pretransform = True,
                     base_instrument='USDT',
-                    commission_percent=0.75,
+                    commission_percent=0.075,
                     window_size=1,
                     max_allowed_slippage_percent=3.0,
                     min_order_amount=1E-4,
@@ -60,19 +72,22 @@ print('fin environment')
 print('')
 
 segments_in_day = 288
-days = 7
 
+exchange._balance = 100
 config = './neat.config'
 strategy = TradingStrategy(environment=environment,
+                           pop_size= pop_size,
+                           initial_connectin='full_nodirect',
+                           max_stagnation= 10,
                            neat_config=config,
-                           watch_genome_evaluation=False,
-                           only_show_profitable=False,
-                           learn_to_trade_theshold=-10000,
+                           watch_genome_evaluation=True,
+                           only_show_profitable=True,
                            data_frame_window = segments_in_day * days,
+                           disable_full_evaluation = True
                           )
 
 print("Running through ", strategy._data_frame_window, ' steps')
 # cp.run("performance, winner, stats = strategy.run(generations=20)", 'evolution_stats')
-performance, winner, stats = strategy.run(generations=200)
+performance, winner, stats = strategy.run(generations=generations)
 
 print('done')

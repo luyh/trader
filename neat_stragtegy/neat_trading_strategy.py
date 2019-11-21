@@ -216,7 +216,7 @@ class NeatTradingStrategy(TradingStrategy):
         raise NotImplementedError
 
     def _derive_action(self, output):
-        print(output[0])
+        #print(output[0])
         try:
             action = int(self._actions/2 * (1 + math.tanh(output[0])))
         except:
@@ -237,13 +237,13 @@ class NeatTradingStrategy(TradingStrategy):
             print("Net Worth:", p['net_worth'])
             print('Steps Completed', p['steps_completed'])
 
-            actions = defaultdict(int)
-            for action, count in Counter(p['actions']).items():
-                actions[self.environment.action_scheme._get_trade_type(action).name] = count
-
-            print('Most common action', actions.items())
-
-            print('Number of trades:', Counter(self.environment.exchange.trades['type']))
+            # actions = defaultdict(int)
+            # for action, count in Counter(p['actions']).items():
+            #     actions[self.environment.action_scheme._get_trade_type(action).name] = count
+            #
+            # print('Most common action', actions.items())
+            #
+            # print('Number of trades:', Counter(self.environment.exchange.trades['type']))
 
         return
 
@@ -310,7 +310,7 @@ class NeatTradingStrategy(TradingStrategy):
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
         while(steps_completed < self._data_frame_window):
-            print('steps_completed:{},_data_frame_window:{}'.format(steps_completed,self._data_frame_window))
+            #print('steps_completed:{},_data_frame_window:{}'.format(steps_completed,self._data_frame_window))
             # activate() the genome and calculate the action output
             output = net.activate(self._get_current_observation(steps_completed))
 
