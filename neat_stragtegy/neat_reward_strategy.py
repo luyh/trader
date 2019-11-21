@@ -31,7 +31,7 @@ class NeatRewardStrategy(RewardScheme, metaclass=ABCMeta):
 
     def reset(self):
         """Necessary to reset the last purchase price and state of open positions."""
-        self._purchase_price = -1
+        self._purchase_price = 0
         self._is_holding_instrument = False
 
     def get_reward(self, current_step: int, trade: Trade) -> float:
@@ -49,9 +49,10 @@ class NeatRewardStrategy(RewardScheme, metaclass=ABCMeta):
             if trade.is_hold and self._is_holding_instrument:
                 reward = 1*sign + log(1 + abs_profit)
                 self._is_holding_instrument = True
-
-            elif trade.is_buy:
+            elif trade.is_buy and not self._is_holding_instrument:
+                # did we just sell and buy on an upswing?
                 self._is_holding_instrument = True
+                self._purchase_price = trade.price
                 reward = 1
             elif trade.is_sell and self._is_holding_instrument:
                 reward = 1*sign + log(1 + abs_profit)
