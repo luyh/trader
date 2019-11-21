@@ -37,7 +37,7 @@ from tensortrade.features.feature_pipeline import FeaturePipeline
 from tensortrade.strategies import TradingStrategy
 from tensortrade.trades import TradeType
 
-
+from tensortrade.trades import Trade
 
 
 class NeatTradingStrategy(TradingStrategy):
@@ -271,7 +271,8 @@ class NeatTradingStrategy(TradingStrategy):
         self._prep_eval()
         genomes_nums = len(genomes)
         for genome_id, genome in genomes:
-            #todo:add tensorforce bar            print('genome_id: {},total genomes nums:{}'.format(genome_id,genomes_nums))
+            #todo:add tensorforce bar
+            #print('genome_id: {},total genomes nums:{}'.format(genome_id,genomes_nums))
             if not self._watch_genome_evaluation:
                 print('*',end='')
 
@@ -306,13 +307,14 @@ class NeatTradingStrategy(TradingStrategy):
 
         # set inital reward
         fitness = 0.0
-
+        obs = self.environment._next_observation(Trade('N/A', 'hold', 0, 0))
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
         while(steps_completed < self._data_frame_window):
             #print('steps_completed:{},_data_frame_window:{}'.format(steps_completed,self._data_frame_window))
             # activate() the genome and calculate the action output
-            output = net.activate(self._get_current_observation(steps_completed))
+
+            output = net.activate(obs)
 
             # action at current step
             action =  self._derive_action(output)
@@ -354,12 +356,19 @@ class NeatTradingStrategy(TradingStrategy):
         self._report_genome_evaluation(genome)
         return fitness
 
-    def run(self, generations: int = None, testing: bool = True, episode_callback: Callable[[pd.DataFrame], bool] = None) -> pd.DataFrame:
+    def run(self, generations: int = None,
+            parralle = False,
+            num_workers = 2,
+            testing: bool = True,
+            episode_callback: Callable[[pd.DataFrame], bool] = None) -> pd.DataFrame:
         # Run for up to 300 generations.
+        if parralle:
+            pe = neat.ParallelEvaluator(num_workers, self._threaded_eval)
+            #pe = neat.ThreadedEvaluator(num_workers, self._threaded_eval)
+            winner = self._pop.run(pe.evaluate, generations)
+        else:
+            winner = self._pop.run(self._eval_population, generations)
 
-        # pe = neat.ParallelEvaluator(10, self._threaded_eval)
-        # winner = self._pop.run(pe.evaluate, generations)
-        winner = self._pop.run(self._eval_population, generations)
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))

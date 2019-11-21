@@ -8,13 +8,14 @@ if sys.platform == 'win32':
     days_of_data = 7
     pop_size = 10
     days = 1
-    generations = 5
+    generations = 20
 else:
     days_of_data = 365
     pop_size = 500
     days = 7
     generations = 100
 
+print('days_of_data={},pop_size = {},days = {},generations = {},'.format( days_of_data,pop_size ,days,generations))
 # number of data frames (our DF is in 1h timesteps)
 frames = days_of_data * 24 * 12
 # frames = len(df)
@@ -45,7 +46,9 @@ from tensortrade.features import FeaturePipeline
 from tensortrade.environments import TradingEnvironment as Environment
 
 print('fin imports')
-normalize = MinMaxNormalizer(inplace=True)
+normalize = MinMaxNormalizer(inplace=True,
+                             input_min = 2000,
+                             input_max = 20000)
 feature_pipeline = FeaturePipeline(steps=[normalize])
 
 reward_scheme = ProfitStrategy()
@@ -56,12 +59,14 @@ exchange = Exchange(data_frame=df_train,
                     pretransform = True,
                     base_instrument='USDT',
                     commission_percent=0.075,
+                    initial_balance = 100,
                     window_size=1,
                     max_allowed_slippage_percent=3.0,
                     min_order_amount=1E-4,
                     min_trade_amount=1E-4,
                     observation_columns = df_train.columns
                    )
+
 print('fin exchange')
 
 environment = Environment(exchange=exchange,
@@ -73,21 +78,22 @@ print('')
 
 segments_in_day = 288
 
-exchange._balance = 100
 config = './neat.config'
 strategy = TradingStrategy(environment=environment,
                            pop_size= pop_size,
                            initial_connectin='full_nodirect',
                            max_stagnation= 10,
                            neat_config=config,
-                           watch_genome_evaluation=True,
+                           watch_genome_evaluation=False,
                            only_show_profitable=True,
                            data_frame_window = segments_in_day * days,
                            disable_full_evaluation = True
                           )
 
-print("Running through ", strategy._data_frame_window, ' steps')
-# cp.run("performance, winner, stats = strategy.run(generations=20)", 'evolution_stats')
-performance, winner, stats = strategy.run(generations=generations)
+if __name__ == '__main__':
 
-print('done')
+    print("Running through ", strategy._data_frame_window, ' steps')
+    # cp.run("performance, winner, stats = strategy.run(generations=20)", 'evolution_stats')
+    performance, winner, stats = strategy.run(generations=generations,parralle = True)
+
+    print('done')
