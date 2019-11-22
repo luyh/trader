@@ -13,7 +13,7 @@ if sys.platform == 'win32':
 else:
     parralle = False
     days_of_data = 365
-    pop_size = 500
+    pop_size = 50
     days = 7
     generations = 100
 
