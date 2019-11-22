@@ -5,6 +5,7 @@ df = pd.read_csv(data_file, index_col=[0])
 import os,sys
 if sys.platform == 'win32':
     parralle = True
+    num_workers = 2
     # number of days we want to pull from the dataframe
     days_of_data = 7
     pop_size = 10
@@ -12,6 +13,7 @@ if sys.platform == 'win32':
     generations = 20
 else:
     parralle = True
+    num_workers = 10
     days_of_data = 365
     pop_size = 50
     days = 7
@@ -96,6 +98,8 @@ if __name__ == '__main__':
 
     print("Running through ", strategy._data_frame_window, ' steps')
     # cp.run("performance, winner, stats = strategy.run(generations=20)", 'evolution_stats')
-    performance, winner, stats = strategy.run(generations=generations,parralle = parralle)
+    performance, winner, stats = strategy.run(generations=generations,
+                                              parralle = parralle,
+                                              num_workers = num_workers)
 
     print('done')
