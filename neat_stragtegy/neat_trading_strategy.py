@@ -14,7 +14,7 @@
 
 import os
 import json
-
+import time
 import pandas as pd
 import numpy as np
 
@@ -200,7 +200,7 @@ class NeatTradingStrategy(TradingStrategy):
         self._pop.add_reporter(neat.StdOutReporter(True))
         self._stats = neat.StatisticsReporter()
         self._pop.add_reporter(self._stats)
-        self._pop.add_reporter(neat.Checkpointer(5))
+        self._pop.add_reporter(neat.Checkpointer(5,filename_prefix='checkpoint/{}_{}_cp-'.format(time.localtime().tm_mon,time.localtime().tm_mday)))
 
 
     def restore_agent(self, path: str, model_path: str = None):
@@ -228,7 +228,7 @@ class NeatTradingStrategy(TradingStrategy):
         if self._watch_genome_evaluation:
             p = self._genome_performance[genome.key]
 
-            if self._only_show_profitable is True and int(p['net_worth']) <= 10000:
+            if self._only_show_profitable is True and int(p['net_worth']) <= self.environment.exchange.initial_balance:
                 return
 
             print("Genome ID: ", genome.key)
