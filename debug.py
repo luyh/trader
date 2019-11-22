@@ -4,14 +4,14 @@ df = pd.read_csv(data_file, index_col=[0])
 
 import os,sys
 if sys.platform == 'win32':
-    parralle = False
+    parralle = True
     # number of days we want to pull from the dataframe
     days_of_data = 7
     pop_size = 10
     days = 1
     generations = 20
 else:
-    parralle = False
+    parralle = True
     days_of_data = 365
     pop_size = 50
     days = 7
