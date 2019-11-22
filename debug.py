@@ -12,7 +12,7 @@ if sys.platform == 'win32':
     days = 1
     generations = 20
 else:
-    parralle = True
+    parralle = False
     num_workers = 10
     days_of_data = 365
     pop_size = 50
