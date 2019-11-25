@@ -198,8 +198,9 @@ class NeatTradingStrategy(TradingStrategy):
         self._pop = neat.Population(self._config)
         # add reporting
         self._pop.add_reporter(neat.StdOutReporter(True))
-        self._stats = neat.StatisticsReporter()
-        self._pop.add_reporter(self._stats)
+        self._stats = None
+        # self._stats = neat.StatisticsReporter()
+        # self._pop.add_reporter(self._stats)
         self._pop.add_reporter(neat.Checkpointer(5,filename_prefix='checkpoint/{}_{}_cp-'.format(time.localtime().tm_mon,time.localtime().tm_mday)))
 
 
