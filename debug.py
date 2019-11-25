@@ -4,7 +4,7 @@ df = pd.read_csv(data_file, index_col=[0])
 
 import os,sys
 if sys.platform == 'win32':
-    parralle = True
+    parralle = False
     num_workers = 2
     # number of days we want to pull from the dataframe
     days_of_data = 30
@@ -41,8 +41,9 @@ del df
 
 import tensortrade
 from neat_stragtegy.neat_trading_strategy import NeatTradingStrategy as TradingStrategy
-from neat_stragtegy.neat_reward_strategy import NeatRewardStrategy as ProfitStrategy
+#from neat_stragtegy.neat_reward_strategy import NeatRewardStrategy as ProfitStrategy
 
+from tensortrade.rewards import RiskAdjustedReturns as ProfitStrategy
 from tensortrade.actions import DiscreteActions
 from tensortrade.exchanges.simulated import SimulatedExchange as Exchange
 from tensortrade.features.scalers import MinMaxNormalizer
@@ -129,7 +130,7 @@ if __name__ == '__main__':
     strategy = TradingStrategy(environment=environment,
                                neat_config=config,
                                watch_genome_evaluation=True,
-                               only_show_profitable=False,
+                               only_show_profitable=True,
                                full_evaluation=True
                                )
 

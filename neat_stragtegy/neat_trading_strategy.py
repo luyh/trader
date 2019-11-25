@@ -226,9 +226,9 @@ class NeatTradingStrategy(TradingStrategy):
 
     def _report_genome_evaluation(self, genome):
         if self._watch_genome_evaluation:
-            p = self._genome_performance[genome.key]
+            p = self._genome_performance
 
-            if self._only_show_profitable is True and int(p['net_worth']) <= self.environment.exchange.initial_balance:
+            if self._only_show_profitable and p['rewards']<0:
                 return
 
             print("Genome ID: ", genome.key)
@@ -277,7 +277,7 @@ class NeatTradingStrategy(TradingStrategy):
                 print('*',end='')
 
             self._environment.reset()
-            self._genome_performance[genome.key] = deepcopy(self._performance_stub)
+            self._genome_performance = deepcopy(self._performance_stub)
             # set the current_step to the start of our window
             self.environment.exchange._current_step = self._data_frame_start_tick
             self.environment._current_step = self._data_frame_start_tick
@@ -303,7 +303,7 @@ class NeatTradingStrategy(TradingStrategy):
         steps_completed = 0
         done = False
         starting_balance = self._environment.exchange.balance
-        self._genome_performance[genome.key] = deepcopy(self._performance_stub)
+        self._genome_performance = deepcopy(self._performance_stub)
 
         # set inital reward
         fitness = 0.0
@@ -327,7 +327,7 @@ class NeatTradingStrategy(TradingStrategy):
             obs, rewards, done, info = self.environment.step(action)
 
             # feed rewards to NEAT to calculate fitness.
-            fitness += rewards
+            fitness = rewards
 
             # count this as a completed step
             steps_completed += 1
@@ -339,12 +339,12 @@ class NeatTradingStrategy(TradingStrategy):
                 done= True
 
 
-            self._genome_performance[genome.key]['rewards'] += rewards
-            self._genome_performance[genome.key]['actions'].append(action)
-            self._genome_performance[genome.key]['steps_completed'] = steps_completed
-            self._genome_performance[genome.key]['trades'] = len(self.environment.exchange.trades)
-            self._genome_performance[genome.key]['balance'] = self.environment.exchange.balance
-            self._genome_performance[genome.key]['net_worth'] = self.environment.exchange.net_worth
+            self._genome_performance['rewards'] = rewards
+            self._genome_performance['actions'].append(action)
+            self._genome_performance['steps_completed'] = steps_completed
+            self._genome_performance['trades'] = len(self.environment.exchange.trades)
+            self._genome_performance['balance'] = self.environment.exchange.balance
+            self._genome_performance['net_worth'] = self.environment.exchange.net_worth
 
             if done:
                 if self._watch_genome_evaluation:
