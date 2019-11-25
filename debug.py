@@ -3,7 +3,7 @@ data_file ='./data/processed/binance/btc_usdt_5m.csv'
 df = pd.read_csv(data_file, index_col=[0])
 
 import os,sys
-if sys.platform == 'win32':
+if sys.platform == 'win32' or sys.platform == 'darwin':
     parralle = True
     num_workers = 2
     # number of days we want to pull from the dataframe
