@@ -228,7 +228,7 @@ class NeatTradingStrategy(TradingStrategy):
         if self._watch_genome_evaluation:
             p = self._genome_performance
 
-            if self._only_show_profitable and p['rewards']<0:
+            if self._only_show_profitable and p['rewards']<=0:
                 return
 
             print("Genome ID: ", genome.key)

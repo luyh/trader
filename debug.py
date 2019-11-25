@@ -94,7 +94,7 @@ if __name__ == '__main__':
                                max_stagnation=10,
                                neat_config=config,
                                watch_genome_evaluation=True,
-                               only_show_profitable=False,
+                               only_show_profitable=True,
                                data_frame_window=segments_in_day * days,
                                disable_full_evaluation=True
                                )
