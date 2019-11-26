@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from memory_profiler import profile
 
 import os
 import json
@@ -294,7 +295,7 @@ class NeatTradingStrategy(TradingStrategy):
 
     def eval_genome(self, genome, config: neat.Config = None):
         if self._watch_genome_evaluation:
-            print('---------------------------')
+            print('*',end='')
 
         if config is None:
             config = self._config.copy()
