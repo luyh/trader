@@ -6,3 +6,5 @@ tensortrade/__pycache__/*
 .ipynb_checkpoints/*
 .idea/*
 neat_stragtegy/__pycache__/__init__.cpython-37.pyc
+neat_stragtegy/__pycache__/neat_trading_strategy.cpython-37.pyc
+checkpoint/
