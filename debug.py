@@ -8,9 +8,8 @@ if sys.platform == 'win32' or sys.platform == 'darwin':
     num_workers = 1
     # number of days we want to pull from the dataframe
     days_of_data = 7
-    pop_size = 50
     days = 1
-    generations = 20
+    generations = 100
 else:
     parralle = False
     num_workers = 10
@@ -19,7 +18,7 @@ else:
     days = 7
     generations = 100
 
-print('days_of_data={},pop_size = {},days = {},generations = {},'.format( days_of_data,pop_size ,days,generations))
+print('days_of_data={},days = {},generations = {},'.format( days_of_data ,days,generations))
 # number of data frames (our DF is in 1h timesteps)
 frames = days_of_data * 24 * 12
 # frames = len(df)
@@ -83,9 +82,7 @@ segments_in_day = 288
 
 config = './neat.config'
 strategy = TradingStrategy(environment=environment,
-                           pop_size= pop_size,
                            initial_connectin='full_nodirect',
-                           max_stagnation= 10,
                            neat_config=config,
                            watch_genome_evaluation=True,
                            only_show_profitable=True,
