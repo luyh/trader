@@ -1,6 +1,6 @@
 import pandas as pd
 data_file ='./data/processed/binance/btc_usdt_5m.csv'
-df = pd.read_csv(data_file, index_col=[0])
+df = pd.read_csv(data_file, index_col=[0])[['close']]
 
 import os,sys
 if sys.platform == 'win32' or sys.platform == 'darwin':
@@ -68,6 +68,8 @@ exchange = Exchange(data_frame=df_train,
                     min_trade_amount=1E-4,
                     observation_columns = df_train.columns
                    )
+
+print(exchange.observation_columns)
 
 print('fin exchange')
 
