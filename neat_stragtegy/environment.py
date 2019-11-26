@@ -1,5 +1,5 @@
 import pandas as pd
-data_file ='./data/processed/binance/btc_usdt_5m.csv'
+data_file ='../data/processed/binance/btc_usdt_5m.csv'
 df = pd.read_csv(data_file, index_col=[0])
 
 import os,sys
@@ -77,29 +77,10 @@ environment = Environment(exchange=exchange,
                                  action_scheme=action_scheme,
                                  reward_scheme=reward_scheme,
                                  feature_pipeline=feature_pipeline)
+
 print('fin environment')
 print('')
 
-segments_in_day = 288
+environment.exchange._balance = 200
 
-config = './neat.config'
-strategy = TradingStrategy(environment=environment,
-                           pop_size= pop_size,
-                           initial_connectin='full_nodirect',
-                           max_stagnation= 10,
-                           neat_config=config,
-                           watch_genome_evaluation=False,
-                           only_show_profitable=True,
-                           data_frame_window = segments_in_day * days,
-                           disable_full_evaluation = True
-                          )
-
-if __name__ == '__main__':
-
-    print("Running through ", strategy._data_frame_window, ' steps')
-    # cp.run("performance, winner, stats = strategy.run(generations=20)", 'evolution_stats')
-    performance, winner, stats = strategy.run(generations=generations,
-                                              parralle = parralle,
-                                              num_workers = num_workers)
-
-    print('done')
+print(exchange.balance,environment.exchange._balance)
