@@ -84,7 +84,6 @@ segments_in_day = 288
 
 config = './neat.config'
 strategy = TradingStrategy(environment=environment,
-                           initial_connectin='full_nodirect',
                            neat_config=config,
                            watch_genome_evaluation=True,
                            only_show_profitable=True,

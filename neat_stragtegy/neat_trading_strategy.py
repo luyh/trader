@@ -101,7 +101,7 @@ class NeatTradingStrategy(TradingStrategy):
 
         print(config)
         config.genome_config.num_inputs = len(self._environment.exchange.data_frame.columns)
-        config.genome_config.num_hidden = len(self._environment.exchange.data_frame.columns)
+        #config.genome_config.num_hidden = len(self._environment.exchange.data_frame.columns)
         config.genome_config.input_keys = [-i - 1 for i in range(config.genome_config.num_inputs)]
         # config.species_set_config.species_fitness_func = self._species_fitness_func #TODO
 
@@ -257,7 +257,9 @@ class NeatTradingStrategy(TradingStrategy):
         if config is None:
             config = self._config.copy()
         # Initialize the network for this genome
-        net = neat.nn.RecurrentNetwork.create(genome, config)
+        #net = neat.nn.RecurrentNetwork.create(genome, config)
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+
         # calculate the steps and keep track of some intial variables
         steps_completed = 0
         done = False
