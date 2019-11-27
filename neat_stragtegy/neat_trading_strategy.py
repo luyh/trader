@@ -268,9 +268,13 @@ class NeatTradingStrategy(TradingStrategy):
 
         # set inital reward
         fitness = 0.0
-        obs = self.environment._next_observation(Trade('N/A', 'hold', 0, 0))
+        obs = self.environment._next_observation()
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
+        plt.ion()
+        self.environment.exchange.data_frame['close'][self.data_frame_start_tick:self._data_frame_window].plot()
+        #self.environment.exchange.data_frame['adx'][self.data_frame_start_tick:self._data_frame_window].plot()
+        plt.show()
         while(steps_completed < self._data_frame_window):
             #print('steps_completed:{},_data_frame_window:{}'.format(steps_completed,self._data_frame_window))
             # activate() the genome and calculate the action output
