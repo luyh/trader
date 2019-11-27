@@ -34,9 +34,9 @@ print('train shape', df_train.shape)
 print('test shape', df_test.shape)
 print('columns', df.columns)
 
-print(df_test.head())
+print(df_train.head())
 
-del df
+#del df
 
 #import tensortrade
 from neat_stragtegy.neat_trading_strategy import NeatTradingStrategy as TradingStrategy
@@ -49,11 +49,14 @@ from tensortrade.environments import TradingEnvironment as Environment
 
 print('fin imports')
 normalize = MinMaxNormalizer(inplace=True,
-                             input_min = 2000,
-                             input_max = 20000)
+                             input_min = 7300,
+                             input_max = 8300,
+                             feature_min = -1,
+                             feature_max = 1)
 feature_pipeline = FeaturePipeline(steps=[normalize])
 
 reward_scheme = ProfitStrategy()
+#todo:action_scheme
 action_scheme = DiscreteActions(n_actions=5, instrument='BTC/USDT')
 print('fin strats')
 
@@ -79,6 +82,9 @@ environment = Environment(exchange=exchange,
                                  feature_pipeline=feature_pipeline)
 print('fin environment')
 print('')
+
+print(exchange.data_frame.head())
+
 
 segments_in_day = 288
 
