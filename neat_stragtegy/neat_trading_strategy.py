@@ -186,6 +186,7 @@ class NeatTradingStrategy(TradingStrategy):
     def _report_genome_evaluation(self, genome):
         if self._watch_genome_evaluation:
             p = self._genome_performance
+            print( 'Actions', str(p['actions']) )
 
             if self._only_show_profitable and p['rewards']<=0:
                 return
@@ -195,6 +196,7 @@ class NeatTradingStrategy(TradingStrategy):
             print('Balance:', p['balance'])
             print("Net Worth:", p['net_worth'])
             print('Steps Completed', p['steps_completed'])
+
 
             # actions = defaultdict(int)
             # for action, count in Counter(p['actions']).items():
@@ -271,10 +273,12 @@ class NeatTradingStrategy(TradingStrategy):
         obs = self.environment._next_observation()
         # walk all timesteps to evaluate our genome
         # while (steps is not None and (steps == 0 or steps_completed < (steps))):
-        plt.ion()
-        self.environment.exchange.data_frame['close'][self.data_frame_start_tick:self._data_frame_window].plot()
+
+        #plt.ion()
+        #self.environment.exchange.data_frame['close'][self.data_frame_start_tick:self._data_frame_window].plot()
         #self.environment.exchange.data_frame['adx'][self.data_frame_start_tick:self._data_frame_window].plot()
-        plt.show()
+        #plt.show()
+
         while(steps_completed < self._data_frame_window):
             #print('steps_completed:{},_data_frame_window:{}'.format(steps_completed,self._data_frame_window))
             # activate() the genome and calculate the action output
