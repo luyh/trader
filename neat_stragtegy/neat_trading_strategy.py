@@ -60,7 +60,7 @@ class NeatTradingStrategy(TradingStrategy):
 
         # catch for custom metrics, this will be moved to a custom stats class eventually
         self._genome_performance = {}
-        self._performance_stub = {"rewards":0, "balance":0, "net_worth":0, "actions": [], "steps_completed":0, 'trades':0}
+        self._performance_stub = {"rewards":0, "balance":0, "net_worth":0,"outputs":[], "actions": [], "steps_completed":0, 'trades':0}
 
         # If we don't learn to trade, our score will drop due to missed oportunities, if it
         # drops below this level, we should stop iterating.
@@ -305,6 +305,7 @@ class NeatTradingStrategy(TradingStrategy):
 
 
             self._genome_performance['rewards'] = rewards
+            self._genome_performance['outputs'].append(output[0])
             self._genome_performance['actions'].append(action)
             self._genome_performance['steps_completed'] = steps_completed
             self._genome_performance['trades'] = len(self.environment.exchange.trades)
